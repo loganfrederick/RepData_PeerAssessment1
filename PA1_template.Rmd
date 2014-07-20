@@ -55,3 +55,21 @@ hist(newDailyStepSum,breaks=15)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+```{r}
+temp$date <- as.Date(temp$date,"%Y-%m-%d")
+
+avgStepInt <- aggregate(temp$steps,temp[3],mean,na.rm=TRUE)
+merged_temp <- merge(x=temp,y=avgStepInt,by="interval",all.x=TRUE)
+merged_temp$steps <- ifelse(is.na(merged_temp$steps),round(merged_temp$x,digits=2),merged_temp$steps)
+
+factor <- merged_temp[,-c(4)]
+factor$flag <- as.factor(ifelse(weekdays(factor$date) %in% c("Saturday","Sunday"),"Weekend","Weekdays"))
+head(factor)
+
+plot_temp <- aggregate(factor$steps,factor[c(1,4)],mean)
+
+library(lattice)
+xyplot(x ~ interval | flag,data = plot_temp,layout=c(1,2),type = "l",xlab = "Interval",ylab = "Number of steps")
+```
