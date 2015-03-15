@@ -2,12 +2,21 @@
 
 
 ## Loading and preprocessing the data
+Navigate to the folder on your machine with your R code and the CSV.
+
+Read the CSV into your program:
+
 ```{r}
 setwd("/Users/loganfrederick/Projects/Coursera Johns Hopkins Data Science/Reproducible Research")
 temp <- read.csv("RepData_PeerAssessment1/activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
+
+Find the Daily Mean, Median, and Total Number of Steps while ignoring missing values.
+
+Provide a Histogram of the daily steps.
+
 ```{r}
 dailyStepsMean <- tapply(temp$steps,temp$date,mean,na.rm=TRUE)
 dailyStepsMedian <- tapply(temp$steps,temp$date,median,na.rm=TRUE)
@@ -24,16 +33,29 @@ hist(dailyStepSum,breaks=15)
 
 ```
 
-
 ## What is the average daily activity pattern?
+
+A Time Series plot of the average number of steps taken at five minute intervals.
+
+The interval with the highest number of steps is #835.
+
 ```{r}
-vectorOne <- as.vector(temp[,1])
-tsOne <- ts(vectorOne)
-ts.plot(tsOne)
+library(ggplot2)
+
+stepsPerInterval <- data.frame(tapply(temp$steps, temp$interval, mean, na.rm=TRUE))
+names(stepsPerInterval) <- "steps"
+stepsPerInterval$interval <- as.integer(row.names(stepsPerInterval))
+ggplot(stepsPerInterval) + aes(x=interval, y=steps) + geom_line()
+which.max(stepsPerInterval$steps)
 ```
 
-
 ## Imputing missing values
+
+The number of missing "steps" values is 2304:
+```{r}
+sum(is.na(temp$steps))
+```
+
 ```{r}
 #Replace NAs with a mean from a random day
 temp[is.na(temp)] <- sample(as.vector(dailyStepsMean), 1)
@@ -50,12 +72,12 @@ print(newDailyStepsMean)
 print(newDailyStepsMedian)
 
 hist(newDailyStepSum,breaks=15)
-
 ```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+Yes, comparing the lattice plots between weekends and weekdays shows at a glance clear difference in activity.
 
 ```{r}
 temp$date <- as.Date(temp$date,"%Y-%m-%d")
